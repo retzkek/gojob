@@ -1,10 +1,10 @@
 package gojob
 
 import (
+	"fmt"
 	"os/exec"
 	"strconv"
 	"strings"
-	"fmt"
 )
 
 type Status int
@@ -22,11 +22,21 @@ func (t *Status) SystemLoad(arg int, reply *Load) error {
 		return err
 	}
 	// parse uptime output (this *should* work with most uptime formats)
-	replyString := strings.Split(string(out), "load average:")[1]
+	var replyString string
+	if strings.Contains(string(out), "load average:") {
+		// linux format
+		replyString = strings.Split(string(out), "load average:")[1]
+	} else if strings.Contains(string(out), "load averages:") {
+		// BSD format
+		replyString = strings.Split(string(out), "load averages:")[1]
+	} else {
+		// unknown format
+		return fmt.Errorf("trouble parsing uptime string [%s]", string(out))
+	}
 	replyString = strings.TrimSpace(replyString)
-	loadStrings := strings.Split(replyString,", ")
+	loadStrings := strings.Split(replyString, ", ")
 	if len(loadStrings) != 3 {
-		return fmt.Errorf("trouble parsing uptime string [%s]",replyString)
+		return fmt.Errorf("trouble parsing uptime string [%s]", replyString)
 	}
 	// one minute
 	reply.One, err = strconv.ParseFloat(loadStrings[0], 64)
