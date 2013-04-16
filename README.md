@@ -1,4 +1,4 @@
 gojob
 =====
 
-Simple job-queuing tool (client)
+Simple job-queuing tool.
