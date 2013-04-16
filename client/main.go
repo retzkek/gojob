@@ -10,8 +10,8 @@ func main() {
 	servers := []string{"mach47", "127.0.0.1", "localhost"}
 	var reply gojob.Load
 	//          1234567890123456789012345678901234567890
-	fmt.Printf("SERVER              LOAD\n")
-	fmt.Printf("------------------- ----\n")
+	fmt.Printf("SERVER              LOAD MESSAGE\n")
+	fmt.Printf("------------------- ---- ---------------\n")
 	// poll servers
 	// TODO: make asynchronous
 	for i, server := range servers {
@@ -19,13 +19,13 @@ func main() {
 		client, err := rpc.DialHTTP("tcp", server+":1234")
 		if err != nil {
 			//log.Fatal("dialing:", err)
-			fmt.Printf("down\n")
+			fmt.Printf("---- %s\n", err)
 		} else {
 			err = client.Call("Status.SystemLoad", i, &reply)
 			if err == nil {
 				fmt.Printf("%4.2f\n", reply.Five)
 			} else {
-				fmt.Printf("err\n")
+				fmt.Printf("---- %s\n", err)
 			}
 		}
 	}
