@@ -4,6 +4,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"fmt"
 )
 
 type Status int
@@ -20,23 +21,25 @@ func (t *Status) SystemLoad(arg int, reply *Load) error {
 	if err != nil {
 		return err
 	}
-	var replyString string
+	// parse uptime output (this *should* work with most uptime formats)
+	replyString := strings.Split(string(out), "load average:")[1]
+	replyString = strings.TrimSpace(replyString)
+	loadStrings := strings.Split(replyString,", ")
+	if len(loadStrings) != 3 {
+		return fmt.Errorf("trouble parsing uptime string [%s]",replyString)
+	}
 	// one minute
-	replyString = strings.Split(string(out), ",")[2]
-	replyString = strings.Split(strings.TrimSpace(replyString), " ")[2]
-	reply.One, err = strconv.ParseFloat(strings.TrimSpace(replyString), 64)
+	reply.One, err = strconv.ParseFloat(loadStrings[0], 64)
 	if err != nil {
 		return err
 	}
 	// five minute
-	replyString = strings.Split(string(out), ",")[3]
-	reply.Five, err = strconv.ParseFloat(strings.TrimSpace(replyString), 64)
+	reply.Five, err = strconv.ParseFloat(loadStrings[1], 64)
 	if err != nil {
 		return err
 	}
 	// fifteen minute
-	replyString = strings.Split(string(out), ",")[4]
-	reply.Fifteen, err = strconv.ParseFloat(strings.TrimSpace(replyString), 64)
+	reply.Fifteen, err = strconv.ParseFloat(loadStrings[2], 64)
 	if err != nil {
 		return err
 	}

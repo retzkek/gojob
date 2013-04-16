@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	servers := []string{"cobra", "127.0.0.1", "localhost"}
+	servers := []string{"mach47", "127.0.0.1", "localhost"}
 	var reply gojob.Load
 	//          1234567890123456789012345678901234567890
 	fmt.Printf("SERVER              LOAD\n")
