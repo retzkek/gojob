@@ -2,24 +2,32 @@ package main
 
 import (
 	"github.com/retzkek/gojob"
-	"log"
 	"net/rpc"
 	"fmt"
 )
 
 func main() {
-	serverAddress := "127.0.0.1"
-	client, err := rpc.DialHTTP("tcp", serverAddress + ":1234")
-	if err != nil {
-		log.Fatal("dialing:", err)
+	servers := []string{"cobra","127.0.0.1","localhost"}
+	var reply gojob.Load
+	//          1234567890123456789012345678901234567890
+	fmt.Printf("SERVER              LOAD\n")
+	fmt.Printf("------------------- ----\n")
+	// poll servers
+	// TODO: make asynchronous
+	for i,server := range servers {
+		fmt.Printf("%-20s",server)
+		client, err := rpc.DialHTTP("tcp", server + ":1234")
+		if err != nil {
+			//log.Fatal("dialing:", err)
+			fmt.Printf("down\n")
+		} else {
+			err = client.Call("Status.SystemLoad", i, &reply)
+			if err == nil {
+				fmt.Printf("%4.2f\n",reply.Five)
+			} else {
+				fmt.Printf("err\n")
+			}
+		}
 	}
-	// Synchronous call
-	args := &gojob.Args{7,8}
-	var reply int
-	err = client.Call("Arith.Multiply", args, &reply)
-	if err != nil {
-		log.Fatal("arith error:", err)
-	}
-	fmt.Printf("Arith: %d*%d=%d", args.A, args.B, reply)
 }
 

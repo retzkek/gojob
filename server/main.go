@@ -9,8 +9,8 @@ import (
 )
 
 func main() {
-	arith := new(gojob.Arith)
-	rpc.Register(arith)
+	status := new(gojob.Status)
+	rpc.Register(status)
 	rpc.HandleHTTP()
 	l, e := net.Listen("tcp", ":1234")
 	if e != nil {
