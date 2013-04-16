@@ -2,8 +2,8 @@ package gojob
 
 import (
 	"os/exec"
-	"strings"
 	"strconv"
+	"strings"
 )
 
 type Status int
@@ -16,27 +16,27 @@ type Load struct {
 
 // SystemLoad returns the system load as reported by uptime. 
 func (t *Status) SystemLoad(arg int, reply *Load) error {
-	out,err := exec.Command("uptime").Output()
+	out, err := exec.Command("uptime").Output()
 	if err != nil {
 		return err
 	}
 	var replyString string
 	// one minute
-	replyString = strings.Split(string(out),",")[2]
-	replyString = strings.Split(strings.TrimSpace(replyString)," ")[2]
-	reply.One,err = strconv.ParseFloat(strings.TrimSpace(replyString),64)
+	replyString = strings.Split(string(out), ",")[2]
+	replyString = strings.Split(strings.TrimSpace(replyString), " ")[2]
+	reply.One, err = strconv.ParseFloat(strings.TrimSpace(replyString), 64)
 	if err != nil {
 		return err
 	}
 	// five minute
-	replyString = strings.Split(string(out),",")[3]
-	reply.Five,err = strconv.ParseFloat(strings.TrimSpace(replyString),64)
+	replyString = strings.Split(string(out), ",")[3]
+	reply.Five, err = strconv.ParseFloat(strings.TrimSpace(replyString), 64)
 	if err != nil {
 		return err
 	}
 	// fifteen minute
-	replyString = strings.Split(string(out),",")[4]
-	reply.Fifteen,err = strconv.ParseFloat(strings.TrimSpace(replyString),64)
+	replyString = strings.Split(string(out), ",")[4]
+	reply.Fifteen, err = strconv.ParseFloat(strings.TrimSpace(replyString), 64)
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func (t *Status) SystemLoad(arg int, reply *Load) error {
 
 // Uptime returns the output of the uptime command.
 func (t *Status) Uptime(arg int, reply *[]byte) error {
-	out,err := exec.Command("uptime").Output()
+	out, err := exec.Command("uptime").Output()
 	if err != nil {
 		return err
 	}
