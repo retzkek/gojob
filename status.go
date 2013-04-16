@@ -65,3 +65,48 @@ func (t *Status) Uptime(arg int, reply *[]byte) error {
 	*reply = out
 	return nil
 }
+
+// Process stores indentifying information on a process.
+type Process struct {
+	Owner string
+	Exe   string
+	Cpu   float64
+	Mem   float64
+	Time  string
+}
+
+// TopProcesses return details on the top processes based on cpu usage.
+// The argument specifies the number of processes to return (not implemented, 
+// currently will always return one process).
+func (t *Status) TopProcesses(arg int, reply *[]Process) error {
+	if arg < 1 {
+		return fmt.Errorf("invalid number of processes: %i", arg)
+	}
+	out, err := exec.Command("ps", "auxk-c", "--no-headers").Output()
+	if err != nil {
+		return err
+	}
+	processes := strings.SplitN(string(out), "\n", arg)
+	if len(processes) != arg {
+		return fmt.Errorf("error parsing ps output")
+	}
+	*reply = make([]Process, arg)
+	for i, ps := range processes {
+		fields := strings.Fields(ps)
+		if len(fields) < 11 {
+			return fmt.Errorf("error parsing ps output")
+		}
+		(*reply)[i].Owner = fields[0]
+		(*reply)[i].Exe = fields[10]
+		(*reply)[i].Cpu, err = strconv.ParseFloat(fields[2], 64)
+		if err != nil {
+			return err
+		}
+		(*reply)[i].Mem, err = strconv.ParseFloat(fields[3], 64)
+		if err != nil {
+			return err
+		}
+		(*reply)[i].Time = fields[9]
+	}
+	return nil
+}

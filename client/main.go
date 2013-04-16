@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/retzkek/gojob"
 	"net/rpc"
+	"path/filepath"
 )
 
 func main() {
@@ -24,6 +25,15 @@ func main() {
 			err = client.Call("Status.SystemLoad", i, &reply)
 			if err == nil {
 				fmt.Printf("%4.2f\n", reply.Five)
+				nproc := int(reply.One + 0.5)
+				procs := make([]gojob.Process, nproc)
+				err = client.Call("Status.TopProcesses", nproc, &procs)
+				if err == nil {
+					for _, ps := range procs {
+						fmt.Printf("   %s running %s for %s\n", ps.Owner,
+							filepath.Base(ps.Exe), ps.Time)
+					}
+				}
 			} else {
 				fmt.Printf("---- %s\n", err)
 			}
