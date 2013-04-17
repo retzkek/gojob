@@ -11,13 +11,15 @@ import (
 
 func runWeb(servers []Server, port int) {
 	http.HandleFunc("/", indexHandler(servers))
-	log.Fatal(http.ListenAndServe(":9999", nil))
+	address := fmt.Sprintf(":%d", port)
+	fmt.Printf("Starting server on %s\n", address)
+	log.Fatal(http.ListenAndServe(address, nil))
 }
 
 func indexHandler(servers []Server) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "<html><head><title>Status</title><body>\n")
-		fmt.Fprintf(w, "<table><tr><th>Server</th><th>Status</th></tr>\n")
+		fmt.Fprintf(w, "<table border=\"1\"><tr><th>Server</th><th>Status</th></tr>\n")
 		for i, server := range servers {
 			host := server.Hostname
 			fmt.Fprintf(w, "<tr><td>%s</td>", host)
