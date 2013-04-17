@@ -1,5 +1,7 @@
 package main
 
+// terminal-based interface
+
 import (
 	"fmt"
 	"github.com/retzkek/gojob"
@@ -7,8 +9,8 @@ import (
 	"path/filepath"
 )
 
-func main() {
-	servers := []string{"mach47", "127.0.0.1", "localhost"}
+func runTerm(servers []Server) {
+	//servers := []string{"mach47", "127.0.0.1", "localhost"}
 	var reply gojob.Load
 	//          1234567890123456789012345678901234567890
 	fmt.Printf("SERVER              LOAD MESSAGE\n")
@@ -16,8 +18,9 @@ func main() {
 	// poll servers
 	// TODO: make asynchronous
 	for i, server := range servers {
-		fmt.Printf("%-20s", server)
-		client, err := rpc.DialHTTP("tcp", server+":1234")
+		host := server.Hostname
+		fmt.Printf("%-20s", host)
+		client, err := rpc.DialHTTP("tcp", host+":1234")
 		if err != nil {
 			//log.Fatal("dialing:", err)
 			fmt.Printf("---- %s\n", err)
