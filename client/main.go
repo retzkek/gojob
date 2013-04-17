@@ -25,7 +25,7 @@ func main() {
 			err = client.Call("Status.SystemLoad", i, &reply)
 			if err == nil {
 				fmt.Printf("%4.2f\n", reply.Five)
-				nproc := int(reply.One + 0.5)
+				nproc := int(reply.One + 1.0)
 				procs := make([]gojob.Process, nproc)
 				err = client.Call("Status.TopProcesses", nproc, &procs)
 				if err == nil {
