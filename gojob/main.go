@@ -33,7 +33,7 @@ func main() {
 	servers[2].Hostname = "localhost"
 
 	if webPort > 0 {
-		runWeb(servers)
+		runWeb(servers, webPort)
 	} else {
 		runTerm(servers)
 	}
