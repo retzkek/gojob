@@ -9,16 +9,19 @@ import (
 	"path/filepath"
 )
 
-func runTerm(servers []Server) {
-	//servers := []string{"mach47", "127.0.0.1", "localhost"}
+func runTerm(backend Backend) {
 	var reply gojob.Load
 	//          1234567890123456789012345678901234567890
 	fmt.Printf("SERVER              LOAD MESSAGE\n")
 	fmt.Printf("------------------- ---- ---------------\n")
 	// poll servers
 	// TODO: make asynchronous
+	servers, err := backend.GetServers()
+	if err != nil {
+		panic(err)
+	}
 	for i, server := range servers {
-		host := server.Hostname
+		host := server.Address
 		fmt.Printf("%-20s", host)
 		client, err := rpc.DialHTTP("tcp", host+":1234")
 		if err != nil {
