@@ -1,0 +1,11 @@
+<html>
+<head><title>Status</title></head>
+<body>
+<table border="1">
+	<tr><th>Server</th><th>Status</th></tr>
+	{{range .}}
+	<tr><td>{{.Address}}</td><td>{{.Load}}</td></tr>
+	{{end}}
+</table>
+</body>
+</html>

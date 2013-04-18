@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/retzkek/gojob"
+	"html/template"
 	"log"
 	"net/http"
 	"net/rpc"
