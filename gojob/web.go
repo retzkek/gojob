@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"net/rpc"
-	"path/filepath"
 )
 
 func runWeb(backend Backend, port int) {
@@ -19,44 +18,38 @@ func runWeb(backend Backend, port int) {
 
 func indexHandler(backend Backend) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		//fmt.Fprintf(w, "<html><head><title>Status</title><body>\n")
-		//fmt.Fprintf(w, "<table border=\"1\"><tr><th>Server</th><th>Status</th></tr>\n")
 		servers, err := backend.GetServers()
 		if err != nil {
 			panic(err)
 		}
 		for i, server := range servers {
 			host := server.Address
-			//fmt.Fprintf(w, "<tr><td>%s</td>", host)
 			client, err := rpc.DialHTTP("tcp", host+":1234")
 			if err != nil {
-				//fmt.Fprintf(w, "<td>%s</td></tr>\n", err)
 				servers[i].Status = fmt.Sprintf("%s", err)
 			} else {
 				var load gojob.Load
 				err = client.Call("Status.SystemLoad", i, &load)
 				if err == nil {
 					//fmt.Fprintf(w, "<td>%4.2f</td></tr>\n", load.Five)
-					servers[i].Status = fmt.Sprintf("%4.2f", load.Five)
+					servers[i].Load = load
+					if load.One < 0.5 {
+						servers[i].Status = "Idle"
+					} else {
+						servers[i].Status = "Busy"
+					}
 					nproc := int(load.One + 1.0)
 					procs := make([]gojob.Process, nproc)
 					err = client.Call("Status.TopProcesses", nproc, &procs)
-					if err == nil {
-						for _, ps := range procs {
-							//fmt.Fprintf(w, "<tr><td></td><td>%s running %s for %s</td></tr>\n", ps.Owner,
-							//	filepath.Base(ps.Exe), ps.Time)
-							fmt.Printf("<tr><td></td><td>%s running %s for %s</td></tr>\n", ps.Owner,
-								filepath.Base(ps.Exe), ps.Time)
-						}
+					if err != nil {
+						log.Print(err)
+					} else {
+						servers[i].Processes = procs
 					}
-				} else {
-					//fmt.Fprintf(w, "<tr><td></td><td></td></tr>%s\n", err)
-					fmt.Printf("<tr><td></td><td></td></tr>%s\n", err)
 				}
 			}
 		}
 		t, _ := template.ParseFiles("templates/list.html")
 		t.Execute(w, servers)
-		//fmt.Fprintf(w, "</table></body></html>")
 	}
 }

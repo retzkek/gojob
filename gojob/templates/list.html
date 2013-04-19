@@ -2,9 +2,18 @@
 <head><title>Status</title></head>
 <body>
 <table border="1">
-	<tr><th>Server</th><th>Status</th></tr>
+	<tr><th>Server</th><th>Status</th><th>Load</th><th>Processes</th></tr>
 	{{range .}}
-	<tr><td>{{.Address}}</td><td>{{.Status}}</td></tr>
+	<tr>
+		<td>{{.Address}}</td><td>{{.Status}}</td>
+		<td>{{.Load.One}},{{.Load.Five}},{{.Load.Fifteen}}</td>
+		<td><table>
+				{{range .Processes}}
+				<tr><td>{{.Owner}}</td><td>{{.Exe}}</td><td>{{.Time}}</td></tr>
+				{{end}}
+			</table>
+		</td>
+	</tr>
 	{{end}}
 </table>
 </body>

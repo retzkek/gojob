@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"github.com/retzkek/gojob"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 	"time"
@@ -10,48 +10,64 @@ import (
 type Server struct {
 	Address   string
 	Status    string
+	Load      gojob.Load
+	Processes []gojob.Process
 	Timestamp time.Time
 }
 
 type Backend interface {
-	AddServer(server string) error
+	AddNewServer(server string) error
+	AddServer(server Server) error
 	GetServers() ([]Server, error)
 }
 
 type Mongo struct {
 	Address  string
 	Database string
-	Session  *mgo.Session
 }
 
 func InitMongo(address string, database string) (*Mongo, error) {
 	m := new(Mongo)
 	m.Address = address
 	m.Database = database
-	session, err := mgo.Dial(address)
-	if err != nil {
-		return nil, err
-	}
-	m.Session = session
 	return m, nil
 }
 
-func (d *Mongo) Close() {
-	d.Session.Close()
-}
-
-func (d *Mongo) AddServer(server string) error {
-	if d.Session == nil {
-		return fmt.Errorf("database session not established")
+func (d *Mongo) AddNewServer(server string) error {
+	session, err := mgo.Dial(d.Address)
+	if err != nil {
+		return err
 	}
-	c := d.Session.DB(d.Database).C("servers")
+	defer session.Close()
+	c := session.DB(d.Database).C("servers")
 	q := c.Find(bson.M{"address": server})
 	cnt, err := q.Count()
 	if err != nil {
 		return err
 	}
 	if cnt == 0 {
-		err = c.Insert(&Server{server, "unknown", time.Now()})
+		err = c.Insert(&Server{server, "unknown", gojob.Load{0, 0, 0}, nil, time.Now()})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (d *Mongo) AddServer(server Server) error {
+	session, err := mgo.Dial(d.Address)
+	if err != nil {
+		return err
+	}
+	defer session.Close()
+	c := session.DB(d.Database).C("servers")
+	q := c.Find(bson.M{"address": server})
+	cnt, err := q.Count()
+	if err != nil {
+		return err
+	}
+	if cnt == 0 {
+		err = c.Insert(server)
 		if err != nil {
 			return err
 		}
@@ -60,12 +76,14 @@ func (d *Mongo) AddServer(server string) error {
 }
 
 func (d *Mongo) GetServers() ([]Server, error) {
-	if d.Session == nil {
-		return nil, fmt.Errorf("database session not established")
+	session, err := mgo.Dial(d.Address)
+	if err != nil {
+		return nil, err
 	}
-	c := d.Session.DB(d.Database).C("servers")
+	defer session.Close()
+	c := session.DB(d.Database).C("servers")
 	var result []Server
-	err := c.Find(nil).Limit(1000).All(&result)
+	err = c.Find(nil).Limit(1000).All(&result)
 	if err != nil {
 		return nil, err
 	}

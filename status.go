@@ -3,6 +3,7 @@ package gojob
 import (
 	"fmt"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -68,11 +69,12 @@ func (t *Status) Uptime(arg int, reply *[]byte) error {
 
 // Process stores indentifying information on a process.
 type Process struct {
-	Owner string
-	Exe   string
-	Cpu   float64
-	Mem   float64
-	Time  string
+	Owner   string
+	Exe     string
+	ExePath string
+	Cpu     float64
+	Mem     float64
+	Time    string
 }
 
 // TopProcesses return details on the top processes based on cpu usage.
@@ -80,7 +82,7 @@ type Process struct {
 // currently will always return one process).
 func (t *Status) TopProcesses(arg int, reply *[]Process) error {
 	if arg < 1 {
-		return fmt.Errorf("invalid number of processes: %i", arg)
+		return fmt.Errorf("invalid number of processes: %d", arg)
 	}
 	out, err := exec.Command("ps", "auxk-c", "--no-headers").Output()
 	if err != nil {
@@ -97,7 +99,8 @@ func (t *Status) TopProcesses(arg int, reply *[]Process) error {
 			return fmt.Errorf("error parsing ps output")
 		}
 		(*reply)[i].Owner = fields[0]
-		(*reply)[i].Exe = fields[10]
+		(*reply)[i].Exe = filepath.Base(fields[10])
+		(*reply)[i].ExePath = filepath.Dir(fields[10])
 		(*reply)[i].Cpu, err = strconv.ParseFloat(fields[2], 64)
 		if err != nil {
 			return err

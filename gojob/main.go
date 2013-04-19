@@ -28,7 +28,7 @@ func main() {
 	}
 
 	if *addServer != "" {
-		err = mongo.AddServer(*addServer)
+		err = mongo.AddNewServer(*addServer)
 		if err != nil {
 			panic(err)
 		}
