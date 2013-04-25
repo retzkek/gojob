@@ -1,20 +1,35 @@
 <html>
-<head><title>Status</title></head>
+<head>
+	<meta charset="utf-8">
+	<title>Status</title>
+	<link href="http://localhost:8000/jquery/css/dot-luv/jquery-ui-1.10.2.custom.css" rel="stylesheet"/>
+	<script src="http://localhost:8000/jquery/js/jquery-1.9.1.js"></script>
+	<script src="http://localhost:8000/jquery/js/jquery-ui-1.10.2.custom.js"></script>
+	<script>
+		$(function() {
+			$("#serverlist").accordion();
+		});
+	</script>
+</head>
 <body>
-<table border="1">
-	<tr><th>Server</th><th>Status</th><th>Load</th><th>Processes</th></tr>
+<h1>Servers</h1>
+<div id="serverlist">
 	{{range .}}
-	<tr>
-		<td>{{.Address}}</td><td>{{.Status}}</td>
-		<td>{{.Load.One}},{{.Load.Five}},{{.Load.Fifteen}}</td>
-		<td><table>
+	<h3>{{.Address}} -- {{.Status}}</h3>
+	<div>
+		<div class="serverdetail">
+			<h4>Load</h4>
+			{{.Load.One}},&nbsp;{{.Load.Five}},&nbsp;{{.Load.Fifteen}}
+			<h4>Processes</h4>
+			<table>
+				<tr><th>Command</th><th>Owner</th><th>Time</th></tr>
 				{{range .Processes}}
-				<tr><td>{{.Owner}}</td><td>{{.Exe}}</td><td>{{.Time}}</td></tr>
+				<tr><td>{{.Exe}}</td><td>{{.Owner}}</td><td>{{.Time}}</td></tr>
 				{{end}}
 			</table>
-		</td>
-	</tr>
+		</div>
+	</div>
 	{{end}}
-</table>
+</div>
 </body>
 </html>
